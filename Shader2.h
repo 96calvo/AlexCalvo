@@ -14,11 +14,11 @@
 class Shader
 {
 private:
-	GLuint Program;
+	
 public:
+	GLuint Program;
 	Shader(const GLchar* vertexPath, const GLchar* fragmentPath);
 	void USE();
 	~Shader();
 
 };
-
