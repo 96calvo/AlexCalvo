@@ -1,12 +1,55 @@
 #version 330 core
 
 // Input vertex data, different for all executions of this shader.
-layout(location = 0) in vec3 vertexPosition_modelspace;
+layout(location = 0) in vec3 position;
+layout(location = 1) in vec3 color;
+
+in int gl_VertexID;
+
+out vec3 VertexColor;
+out vec4 VertexPosition;
+
+uniform vec3 offset;
+
+vec3 colorRojo = vec3 (1.0f, 0.0f, 0.0f);
+vec3 incre = vec3 (0.0f, 0.0f ,0.0f);
 
 void main(){
 
-    gl_Position.xyz = vertexPosition_modelspace;
-    gl_Position.w = 1.0;
+    //gl_Position.xyz = position;
+    //gl_Position.w = 1.0;
+	
+	switch(gl_VertexID)
+	{
+	
+	case 1: 
+	
+		gl_Position = vec4(position + offset, 1.0);
+		VertexPosition = vec4(position + offset, 1.0);
+		incre = (position + offset);
+		
+		//Color
 
+		//VertexColor = vec3(incre*colorRojo + (-incre)*color,1.0);
+		
+		break;
+		
+		case 2: 
+		
+			gl_Position = vec4(position - offset , 1.0);
+			VertexPosition = vec4(position - offset , 1.0);
+			
+			incre= -(position - offset);
+
+			//Color		
+			//VertexColor = vec3(incre*colorRojo + (incre)*color,1.0);
+		break;
+		
+		default: 
+			gl_Position = vec4(position, 1.0);
+			VertexPosition = vec4(position, 1.0);
+			VertexColor = color;
+		break;
+	
+	}
 }
-
