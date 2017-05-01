@@ -16,14 +16,14 @@ using namespace glm;
 
 #define PI 3.14159265
 const GLint WIDTH = 800, HEIGHT = 600;
-bool WIREFRAME = false;
 int screenWithd, screenHeight;
 
 bool KeyUp = false;
 bool KeyDown = false;
 bool KeyLeft = false;
 bool KeyRight = false;
-
+bool Key1 = false;
+bool Key2 = false;
 
 void error_callback(int error, const char* description)
 {
@@ -66,49 +66,82 @@ int main() {
 		return NULL;
 	}
 
-	//set function when callback
-	
 
-	//int screenWithd, screenHeight;
+	glEnable(GL_DEPTH_TEST);
+
+
 	glfwGetFramebufferSize(window, &screenWithd, &screenHeight);
-	//glViewport(0, 0, screenWithd, screenHeight);
-	glfwSetKeyCallback(window, key_callback);
-	//cargamos los shader
-
-	//Shader move("./src/SimpleVertexShader.vertexshader", "./src/SimpleFragmentShader.fragmentshader");
-	Shader text("./src/textureVertex.vertexshader", "./src/textureFragment.fragmentshader");
-
-	// Definir el buffer de vertices
-	GLfloat vertex[] = {
-
-		// Positions          // Colors           // Texture Coords
-		0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,  // Top Right
-		0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,  // Bottom Right
-		-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // Bottom Left
-		-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // Top Left 
-	};
-
-
-	// Definir el EBO
-
-	// Crear los VBO, VAO y EBO
 	
-	GLuint IndexBufferObject[]{
-		3,0,2,
-		0,1,2
+	glfwSetKeyCallback(window, key_callback);
+
+	//Shader text("./src/textureVertex.vertexshader", "./src/textureFragment.fragmentshader");
+	Shader coord("./src/coordVertex.vertexshader", "./src/coordFragment.fragmentshader");
+	GLfloat VertexBufferCube[] = {
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+		0.5f , -0.5f, -0.5f,  1.0f, 0.0f,
+		0.5f ,  0.5f, -0.5f,  1.0f, 1.0f,
+		0.5f ,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		0.5f , -0.5f,  0.5f,  1.0f, 0.0f,
+		0.5f ,  0.5f,  0.5f,  1.0f, 1.0f,
+		0.5f ,  0.5f,  0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		0.5f ,  0.5f,  0.5f,  1.0f, 0.0f,
+		0.5f ,  0.5f, -0.5f,  1.0f, 1.0f,
+		0.5f , -0.5f, -0.5f,  0.0f, 1.0f,
+		0.5f , -0.5f, -0.5f,  0.0f, 1.0f,
+		0.5f , -0.5f,  0.5f,  0.0f, 0.0f,
+		0.5f ,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		0.5f , -0.5f, -0.5f,  1.0f, 1.0f,
+		0.5f , -0.5f,  0.5f,  1.0f, 0.0f,
+		0.5f , -0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		0.5f ,  0.5f, -0.5f,  1.0f, 1.0f,
+		0.5f ,  0.5f,  0.5f,  1.0f, 0.0f,
+		0.5f ,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 	};
 
-	glfwGetTime();
+	vec3 CubesPositionBuffer[] = {
+		vec3(0.0f ,  0.0f,  0.0f),
+		vec3(2.0f ,  5.0f, -15.0f),
+		vec3(-1.5f, -2.2f, -2.5f),
+		vec3(-3.8f, -2.0f, -12.3f),
+		vec3(2.4f , -0.4f, -3.5f),
+		vec3(-1.7f,  3.0f, -7.5f),
+		vec3(1.3f , -2.0f, -2.5f),
+		vec3(1.5f ,  2.0f, -2.5f),
+		vec3(1.5f ,  0.2f, -1.5f),
+		vec3(-1.3f,  1.0f, -1.5f)
+	};
+
+	//glfwGetTime();
 
 	GLuint VBO;
-	GLuint EBO;
+	//GLuint EBO;
 	GLuint VAO;
 
-
-
-	//reservar memoria para el VAO, VBO y EBO
+	
+	//reservar memoria para el VAO y VBO
 	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
 	glGenBuffers(1, &VAO);
 
 	
@@ -118,7 +151,7 @@ int main() {
 	//Enlazar el buffer con openGL
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
 	//Texture
 	GLuint texture;
@@ -148,147 +181,132 @@ int main() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	//
 	int width2, height2;
-	unsigned char* image2 = SOIL_load_image("./src/crash_bandicoo.png", &width2, &height2, 0, SOIL_LOAD_RGB);
+	unsigned char* image2 = SOIL_load_image("./src/texture2.png", &width2, &height2, 0, SOIL_LOAD_RGB);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width2, height2, 0, GL_RGB, GL_UNSIGNED_BYTE, image2);
 	SOIL_free_image_data(image2);
 	glBindTexture(GL_TEXTURE_2D, 1);
 
-	GLfloat opac = 0.2f;
+
+	mat4 projection;
+	projection = perspective(45.0f, (GLfloat)screenWithd / (GLfloat)screenHeight,0.1f,100.0f );
+	GLfloat opac = 0.0f;
 	
 	//Alocamos memoria suficiente para almacenar 4 grupos de 3 floats (segundo parámetro)
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex), vertex, GL_STATIC_DRAW);
-	//Alocamos ahora el EBO()
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(vertex), IndexBufferObject, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(VertexBufferCube), VertexBufferCube, GL_STATIC_DRAW);
+
 	//Establecer las propiedades de los vertices
 
 	//buffer de posiciones
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GL_FLOAT), (GLvoid*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT), (GLvoid*)0);
 	glEnableVertexAttribArray(0);
 
-	//buffer de color
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GL_FLOAT), (GLvoid*)(3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(1);
 	//buffer textura
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GL_FLOAT), (GLvoid*)(6 * sizeof(GLfloat)));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT), (GLvoid*)(3 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(2);
 
 	glBindVertexArray(0);
-	/*
-	GLfloat lastTime = 0;
-	GLfloat angle = 0;
-	GLfloat increment = 0;
-	*/
+
 	//bucle de dibujado
 	while (!glfwWindowShouldClose(window)) {
 
 		glfwPollEvents();
 		glClearColor(0.0f, 1.0f, 0.8f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//Establecer el shader
-		/*
-		move.USE();
-		
-		GLint variableShader = glGetUniformLocation(move.Program, "offset");
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glUniform1i(glGetUniformLocation(coord.Program, "Texture"), 0);
 
-		
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, texture2);
+		glUniform1i(glGetUniformLocation(coord.Program, "Texture2"), 1);
 
-		GLdouble currentTime = glfwGetTime(); 
-		GLfloat deltatime = GLfloat(currentTime - lastTime);
+		glUniform1f(glGetUniformLocation(coord.Program, "opac"), opac);
 
-		//Angulo
 
-		if (deltatime > 0.04)
-		{
-			increment = abs(sin(angle / 180 * PI));
+		if (Key1) {
 
-			//Pasamos el contenido al shader
-
-			glUniform3f(variableShader, increment*0.5f, 0.0f, 0.0f);
-			lastTime = currentTime;
-			angle++;
-
+			opac = 0.0f;
+			
+			glUniform1f(glGetUniformLocation(coord.Program, "opac"), opac);
+			Key1 = false;
 		}
 
-		//Comprobar que encuentra la variable Uniform del shader
-		
-		if (glGetUniformLocation(move.Program, "offset") == -1) {
-		cout << "Error al localizar la variable Uniform" << endl;
-		glfwTerminate();
+		if (Key2) {
+			opac = 1.0f;
+
+			glUniform1f(glGetUniformLocation(coord.Program, "opac"), opac);
+			Key2 = false;
 		}
-		*/
-		//GLint offset;
-		//offset = (glGetUniformLocation(move.Program, "offset"));
-		//glUniform1f(offset, cos(abs(glfwGetTime())));
 
-		if (WIREFRAME) {
-
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		}
-		else
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-
-		text.USE();
-		GLfloat angle;
+		GLfloat anglex;
+		GLfloat angley;
 		if (KeyLeft) {
-			angle = angle + 5.0f;
+			angley = angley - 5.0f;
 			KeyLeft = false;
 		}
 		if (KeyRight) {
-			angle = angle - 5.0f;
+			angley = angley + 5.0f;
 			KeyRight = false;
 		}
+		if (KeyUp) {
+			anglex = anglex - 5.0f;
+			KeyUp = false;
+		}
+		if (KeyDown) {
+			anglex = anglex + 5.0f;
+			KeyDown = false;
+		}
 
+		coord.USE();
+
+		/*
 		mat4 transform;
 		transform = scale(transform, vec3(0.5f, -0.5f, 0.0));
 		transform = translate(transform, vec3(0.5f,0.5f,0.0));
 		transform = rotate(transform, angle , vec3(0.0f,0.0f,1.0f));
 
-		GLint transformlocation = glGetUniformLocation(text.Program, "transform");
-
+		GLint transformlocation = glGetUniformLocation(coord.Program, "transform");
 
 		glUniformMatrix4fv(transformlocation, 1, GL_FALSE , value_ptr(transform));
+		*/
+
+
 		//draw texture
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture);
-		glUniform1i(glGetUniformLocation(text.Program, "Texture"), 0);
 
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, texture2);
-		glUniform1i(glGetUniformLocation(text.Program, "Texture2"), 1);
-
-		glUniform1f(glGetUniformLocation(text.Program, "opac"), opac);
-
-		
-		if (KeyUp) {
-
-			if (opac <= 0) {
-				opac = 0;
-			}
-			else {
-				opac = opac - 0.1;
-			}
-			glUniform1f(glGetUniformLocation(text.Program, "opac"), opac);
-			KeyUp = false;
-		}
-		if (KeyDown) {
-
-			if (opac >= 1) {
-				opac = 1;
-			}
-			else {
-				opac = opac + 0.1;
-
-			}
-			glUniform1f(glGetUniformLocation(text.Program, "opac"), opac);
-			KeyDown = false;
-		}
-		
-
-
+		/*
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
+		*/
+
+		mat4 model;
+		mat4 view;
+		model = rotate(model, anglex , vec3(1.0f,0.0f,0.0f));
+		model = rotate(model, angley , vec3(0.0f, 1.0f, 0.0f));
+		view = translate(view, vec3(0.0f, 0.0f, -3.0f));
+
+		GLint modelLoc = glGetUniformLocation(coord.Program, "model");
+		GLint viewLoc = glGetUniformLocation(coord.Program, "view");
+		GLint projLoc = glGetUniformLocation(coord.Program, "projection");
+		glUniformMatrix4fv(modelLoc, 1,GL_FALSE,value_ptr(model));
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, value_ptr(view));
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, value_ptr(projection));
+
+		
+		glBindVertexArray(VAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		
+		for (GLuint i = 1; i < 10; i++)
+		{
+			glm::mat4 model;
+			model = translate(model, CubesPositionBuffer[i]);
+			model = rotate(model, (GLfloat)glfwGetTime() * 100, glm::vec3(1.0f, 1.0f, 0.0f));
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
+		
 		glBindVertexArray(0);
 
 		glfwSwapBuffers(window);
@@ -301,7 +319,7 @@ int main() {
 
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
-	glDeleteBuffers(1, &EBO);
+	//glDeleteBuffers(1, &EBO);
 
 	glfwDestroyWindow(window);
 	glfwTerminate();
@@ -311,13 +329,13 @@ int main() {
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	//Cuando pulsamos la tecla ESC se cierra la aplicacion
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, GL_TRUE);
 
-	//Cuando apretamos la tecla W se cambia a modo Wireframe
-	if (key == GLFW_KEY_W && action == GLFW_PRESS)
-		WIREFRAME = !WIREFRAME;
+	//Cuando pulsamos la tecla ESC se cierra la aplicacion
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+		glfwSetWindowShouldClose(window, GL_TRUE);
+	}
+
+	//Teclas Flechas
 	if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
 		KeyUp = true;
 	}
@@ -329,5 +347,16 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 	if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) {
 		KeyRight = true;
+	}
+	if (key == GLFW_KEY_LEFT && action == GLFW_PRESS) {
+		KeyLeft = true;
+	}
+
+	//Teclas Numericas
+	if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
+		Key1 = true;
+	}
+	if (key == GLFW_KEY_2 && action == GLFW_PRESS) {
+		Key2 = true;
 	}
 }
