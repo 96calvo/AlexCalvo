@@ -14,7 +14,7 @@
 using namespace std;
 using namespace glm;
 
-#define PI 3.14159265
+
 const GLint WIDTH = 800, HEIGHT = 600;
 int screenWithd, screenHeight;
 
@@ -24,6 +24,10 @@ bool KeyLeft = false;
 bool KeyRight = false;
 bool Key1 = false;
 bool Key2 = false;
+bool KeyW = false;
+bool KeyA = false;
+bool KeyS = false;
+bool KeyD = false;
 
 void error_callback(int error, const char* description)
 {
@@ -133,7 +137,7 @@ int main() {
 		vec3(-1.3f,  1.0f, -1.5f)
 	};
 
-	//glfwGetTime();
+
 
 	GLuint VBO;
 	//GLuint EBO;
@@ -181,7 +185,7 @@ int main() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	//
 	int width2, height2;
-	unsigned char* image2 = SOIL_load_image("./src/texture2.png", &width2, &height2, 0, SOIL_LOAD_RGB);
+	unsigned char* image2 = SOIL_load_image("./src/crash_bandicoot.png", &width2, &height2, 0, SOIL_LOAD_RGB);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width2, height2, 0, GL_RGB, GL_UNSIGNED_BYTE, image2);
 	SOIL_free_image_data(image2);
 	glBindTexture(GL_TEXTURE_2D, 1);
@@ -207,6 +211,30 @@ int main() {
 	glBindVertexArray(0);
 
 	//bucle de dibujado
+	GLfloat anglex;
+	GLfloat angley;
+
+	mat4 view;
+
+	GLint modelLoc;
+	GLint viewLoc;
+	GLint projLoc;
+
+	vec3 cameraPos; //= vec3(0.0f, 0.0f, 3.0f);
+	vec3 cameraTarget = vec3(0.0f, 0.0f, 0.0f);
+	vec3 cameraFront = vec3(0.0f, 0.0f, -1.0f);
+	vec3 cameraDirection = normalize(cameraPos - cameraTarget);
+	vec3 up = vec3(0.0f, 1.0f, 0.0f);
+	vec3 cameraRight = normalize(cross(up, cameraDirection));
+	vec3 cameraUp = cross(cameraDirection, cameraRight);
+
+	GLfloat radio = 8.0f;
+	GLfloat X = 0.0f;
+	GLfloat Z = 3.0f;
+
+	GLuint i;
+
+	
 	while (!glfwWindowShouldClose(window)) {
 
 		glfwPollEvents();
@@ -240,8 +268,7 @@ int main() {
 			Key2 = false;
 		}
 
-		GLfloat anglex;
-		GLfloat angley;
+
 		if (KeyLeft) {
 			angley = angley - 5.0f;
 			KeyLeft = false;
@@ -281,15 +308,39 @@ int main() {
 		glBindVertexArray(0);
 		*/
 
+		//hola
+
+
+
 		mat4 model;
-		mat4 view;
 		model = rotate(model, anglex , vec3(1.0f,0.0f,0.0f));
 		model = rotate(model, angley , vec3(0.0f, 1.0f, 0.0f));
 		view = translate(view, vec3(0.0f, 0.0f, -3.0f));
 
-		GLint modelLoc = glGetUniformLocation(coord.Program, "model");
-		GLint viewLoc = glGetUniformLocation(coord.Program, "view");
-		GLint projLoc = glGetUniformLocation(coord.Program, "projection");
+		 X = sin(glfwGetTime())*radio;
+		 Z = cos(glfwGetTime())*radio;
+		 if (KeyW) {
+			 Z -= 0.1f;
+			 KeyW = false;
+		 }
+		 if (KeyA) {
+			 X -= 0.1f;
+			 KeyA = false;
+		 }
+		 if (KeyS) {
+			 Z += 0.1f;
+			 KeyS = false;
+		 }
+		 if (KeyD) {
+			 X += 0.1f;
+			 KeyD = false;
+		 }
+		 cameraPos = vec3(X, 0.0f, Z);
+		 view = /*lookAt(cameraPos, cameraPos + cameraFront, up);*/ lookAt(vec3(X, 0.0f, Z), vec3(0.0f, 0.0f, 0.0f),vec3(0.0f, 1.0f, 0.0f));
+
+		modelLoc = glGetUniformLocation(coord.Program, "model");
+		viewLoc = glGetUniformLocation(coord.Program, "view");
+		projLoc = glGetUniformLocation(coord.Program, "projection");
 		glUniformMatrix4fv(modelLoc, 1,GL_FALSE,value_ptr(model));
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, value_ptr(view));
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, value_ptr(projection));
@@ -298,12 +349,12 @@ int main() {
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		
-		for (GLuint i = 1; i < 10; i++)
+		for (i = 1; i < 10; ++i)
 		{
-			glm::mat4 model;
-			model = translate(model, CubesPositionBuffer[i]);
-			model = rotate(model, (GLfloat)glfwGetTime() * 100, glm::vec3(1.0f, 1.0f, 0.0f));
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+			mat4 model2;
+			model2 = translate(model2, CubesPositionBuffer[i]);
+			model2 = rotate(model2, (GLfloat)glfwGetTime() * 3.0f, glm::vec3(1.0f, 1.0f, 0.0f));
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model2));
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 		
@@ -348,9 +399,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) {
 		KeyRight = true;
 	}
-	if (key == GLFW_KEY_LEFT && action == GLFW_PRESS) {
-		KeyLeft = true;
-	}
 
 	//Teclas Numericas
 	if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
@@ -359,4 +407,23 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	if (key == GLFW_KEY_2 && action == GLFW_PRESS) {
 		Key2 = true;
 	}
+
+	//Teclas Letras
+	if (key == GLFW_KEY_W) {
+		KeyW = true;
+	}
+	if (key == GLFW_KEY_A) {
+		KeyA = true;
+	}
+	if (key == GLFW_KEY_S) {
+		KeyS = true;
+	}
+	if (key == GLFW_KEY_D) {
+		KeyD = true;
+	}
+
+
+
+
+
 }
