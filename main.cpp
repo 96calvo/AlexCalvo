@@ -34,7 +34,7 @@ void error_callback(int error, const char* description)
 	fputs(description, stderr);
 }
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
-
+void DoMovement(GLFWwindow* window);
 
 int main() {
 
@@ -238,6 +238,7 @@ int main() {
 	while (!glfwWindowShouldClose(window)) {
 
 		glfwPollEvents();
+		DoMovement(window);
 		glClearColor(0.0f, 1.0f, 0.8f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -317,8 +318,8 @@ int main() {
 		model = rotate(model, angley , vec3(0.0f, 1.0f, 0.0f));
 		view = translate(view, vec3(0.0f, 0.0f, -3.0f));
 
-		 X = sin(glfwGetTime())*radio;
-		 Z = cos(glfwGetTime())*radio;
+		// X = sin(glfwGetTime()*3)*radio;
+		 //Z = cos(glfwGetTime()*3)*radio;
 		 if (KeyW) {
 			 Z -= 0.1f;
 			 KeyW = false;
@@ -336,7 +337,7 @@ int main() {
 			 KeyD = false;
 		 }
 		 cameraPos = vec3(X, 0.0f, Z);
-		 view = /*lookAt(cameraPos, cameraPos + cameraFront, up);*/ lookAt(vec3(X, 0.0f, Z), vec3(0.0f, 0.0f, 0.0f),vec3(0.0f, 1.0f, 0.0f));
+		 view = lookAt(cameraPos, cameraPos + cameraFront, up);// lookAt(vec3(X, 0.0f, Z), vec3(0.0f, 0.0f, 0.0f),vec3(0.0f, 1.0f, 0.0f));
 
 		modelLoc = glGetUniformLocation(coord.Program, "model");
 		viewLoc = glGetUniformLocation(coord.Program, "view");
@@ -377,6 +378,21 @@ int main() {
 	std::exit(EXIT_SUCCESS);
 }
 
+void DoMovement(GLFWwindow* window) {
+	if (glfwGetKey(window, GLFW_KEY_W)) {
+		KeyW = true;
+	}
+	if (glfwGetKey(window, GLFW_KEY_A)) {
+		KeyA = true;
+	}
+	if (glfwGetKey(window, GLFW_KEY_S)) {
+		KeyS = true;
+	}
+	if (glfwGetKey(window, GLFW_KEY_D)) {
+		KeyD = true;
+	}
+}
+
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -407,23 +423,5 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	if (key == GLFW_KEY_2 && action == GLFW_PRESS) {
 		Key2 = true;
 	}
-
-	//Teclas Letras
-	if (key == GLFW_KEY_W) {
-		KeyW = true;
-	}
-	if (key == GLFW_KEY_A) {
-		KeyA = true;
-	}
-	if (key == GLFW_KEY_S) {
-		KeyS = true;
-	}
-	if (key == GLFW_KEY_D) {
-		KeyD = true;
-	}
-
-
-
-
 
 }
