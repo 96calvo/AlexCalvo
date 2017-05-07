@@ -8,14 +8,15 @@
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
 #include "Shader2.h"
-
+#include "Camara.h"
 #include "SOIL.h"
+
 
 using namespace std;
 using namespace glm;
 
 
-const GLint WIDTH = 800, HEIGHT = 600;
+//const GLint WIDTH = 800, HEIGHT = 600;
 int screenWithd, screenHeight;
 
 bool KeyUp = false;
@@ -29,16 +30,30 @@ bool KeyA = false;
 bool KeyS = false;
 bool KeyD = false;
 
+vec3 cameraPos = vec3(0.0f, 0.0f, 3.0f);
+vec3 cameraFront = vec3(0.0f, 0.0f, -1.0f);
+GLfloat sensitivity = 0.05;
+GLfloat Fov = 45.0;
+
+
+
+
 void error_callback(int error, const char* description)
 {
 	fputs(description, stderr);
 }
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void DoMovement(GLFWwindow* window);
+void UseMouse(GLFWwindow* window, double xpos, double ypos);
+void UseScroll(GLFWwindow* window, double xoffset, double yoffset);
+
+Camara newcam(cameraPos, cameraFront, sensitivity, Fov);
+
 
 int main() {
 
 	//initGLFW
+
 
 	//set GLFW
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -78,6 +93,11 @@ int main() {
 	
 	glfwSetKeyCallback(window, key_callback);
 
+	glfwSetScrollCallback(window, UseScroll);
+
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+	
 	//Shader text("./src/textureVertex.vertexshader", "./src/textureFragment.fragmentshader");
 	Shader coord("./src/coordVertex.vertexshader", "./src/coordFragment.fragmentshader");
 	GLfloat VertexBufferCube[] = {
@@ -192,7 +212,7 @@ int main() {
 
 
 	mat4 projection;
-	projection = perspective(45.0f, (GLfloat)screenWithd / (GLfloat)screenHeight,0.1f,100.0f );
+	
 	GLfloat opac = 0.0f;
 	
 	//Alocamos memoria suficiente para almacenar 4 grupos de 3 floats (segundo parámetro)
@@ -219,26 +239,29 @@ int main() {
 	GLint modelLoc;
 	GLint viewLoc;
 	GLint projLoc;
-
+	/*
 	vec3 cameraPos; //= vec3(0.0f, 0.0f, 3.0f);
-	vec3 cameraTarget = vec3(0.0f, 0.0f, 0.0f);
-	vec3 cameraFront = vec3(0.0f, 0.0f, -1.0f);
+	vec3 cameraTarget = vec3(0.0f, 0.0f, -1.0f);
+
 	vec3 cameraDirection = normalize(cameraPos - cameraTarget);
 	vec3 up = vec3(0.0f, 1.0f, 0.0f);
 	vec3 cameraRight = normalize(cross(up, cameraDirection));
 	vec3 cameraUp = cross(cameraDirection, cameraRight);
-
+	*/
 	GLfloat radio = 8.0f;
 	GLfloat X = 0.0f;
 	GLfloat Z = 3.0f;
 
 	GLuint i;
 
+
 	
 	while (!glfwWindowShouldClose(window)) {
 
 		glfwPollEvents();
 		DoMovement(window);
+		glfwSetCursorPosCallback(window, UseMouse);
+		projection = perspective(newcam.GetFOV(), (GLfloat)screenWithd / (GLfloat)screenHeight, 0.1f, 100.0f);
 		glClearColor(0.0f, 1.0f, 0.8f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -288,7 +311,6 @@ int main() {
 		}
 
 		coord.USE();
-
 		/*
 		mat4 transform;
 		transform = scale(transform, vec3(0.5f, -0.5f, 0.0));
@@ -308,18 +330,14 @@ int main() {
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 		*/
-
-		//hola
-
-
-
 		mat4 model;
 		model = rotate(model, anglex , vec3(1.0f,0.0f,0.0f));
 		model = rotate(model, angley , vec3(0.0f, 1.0f, 0.0f));
 		view = translate(view, vec3(0.0f, 0.0f, -3.0f));
-
-		// X = sin(glfwGetTime()*3)*radio;
-		 //Z = cos(glfwGetTime()*3)*radio;
+		
+		//X = sin(glfwGetTime()*3)*radio;
+		//Z = cos(glfwGetTime()*3)*radio;
+		/*
 		 if (KeyW) {
 			 Z -= 0.1f;
 			 KeyW = false;
@@ -337,8 +355,9 @@ int main() {
 			 KeyD = false;
 		 }
 		 cameraPos = vec3(X, 0.0f, Z);
-		 view = lookAt(cameraPos, cameraPos + cameraFront, up);// lookAt(vec3(X, 0.0f, Z), vec3(0.0f, 0.0f, 0.0f),vec3(0.0f, 1.0f, 0.0f));
-
+		 */
+		 //view = lookAt(cameraPos, cameraPos + cameraFront, cameraUp);//lookAt(vec3(X, 0.0f, Z), vec3(0.0f, 0.0f, 0.0f),vec3(0.0f, 1.0f, 0.0f));
+		view = newcam.LookAt();
 		modelLoc = glGetUniformLocation(coord.Program, "model");
 		viewLoc = glGetUniformLocation(coord.Program, "view");
 		projLoc = glGetUniformLocation(coord.Program, "projection");
@@ -379,6 +398,8 @@ int main() {
 }
 
 void DoMovement(GLFWwindow* window) {
+	newcam.DoMovement(window);
+	/*
 	if (glfwGetKey(window, GLFW_KEY_W)) {
 		KeyW = true;
 	}
@@ -391,11 +412,71 @@ void DoMovement(GLFWwindow* window) {
 	if (glfwGetKey(window, GLFW_KEY_D)) {
 		KeyD = true;
 	}
+	*/
+}
+//
+//bool firstMouse = false;
+/*
+GLfloat lastX = WIDTH / 2.0;
+GLfloat lastY = HEIGHT / 2.0;
+GLfloat YAW = -90.0f;
+GLfloat PITCH = 0.0f;
+*/
+
+void UseMouse(GLFWwindow* window, double xpos, double ypos) {
+
+	newcam.MouseMove(window, xpos, ypos);
+
+	/*
+	if (firstMouse){
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
+	}
+	
+	
+	GLfloat xoffset = xpos - lastX;
+	GLfloat yoffset = lastY - ypos;
+	lastX = xpos;
+	lastY = ypos;
+
+
+	xoffset *= sensitivity;
+	yoffset *= sensitivity;
+	
+	YAW += xoffset;
+	PITCH += yoffset;
+
+	if (PITCH > 89.0f)
+		PITCH = 89.0f;
+	if (PITCH < -89.0f)
+		PITCH = -89.0f;
+
+	glm::vec3 front;
+	front.x = cos(radians(YAW)) * cos(radians(PITCH));
+	front.y = sin(radians(PITCH));
+	front.z = sin(radians(YAW)) * cos(radians(PITCH));
+	
+	cameraFront = normalize(front);
+	
+	*/
 }
 
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
+void UseScroll(GLFWwindow* window, double xoffset, double yoffset){
+	
+	newcam.MouseScroll(window, xoffset, yoffset);
+	/*
+	if (Fov >= 1.0f && Fov <= 45.0f)
+		Fov -= yoffset;
+	if (Fov <= 1.0f)
+		Fov = 1.0f;
+	if (Fov >= 45.0f)
+		Fov = 45.0f;
+	*/
+}
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods){
 
 	//Cuando pulsamos la tecla ESC se cierra la aplicacion
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
